@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Traveler Admin Suite | Full Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    :root {
+      --primary: #2c7da0;
+      --primary-light: #61a5c2;
+      --accent-green: #2ecc71;
+      --dark-green: #27ae60;
+      --danger: #e74c3c;
+      --warning: #f39c12;
+      --dark-text: #1e2a41;
+      --glass-bg: rgba(255, 255, 255, 0.94);
+      --shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      background: #d4e6f1;
+      min-height: 100vh;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url('https://res.cloudinary.com/dt2xaqo32/image/upload/v1777551088/31395-travel-the-world-ultra-hd-desktop-background-wallpaper-for-4k-uhd_1_fegcnn.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      opacity: 0.15;
+      z-index: -2;
+      pointer-events: none;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 40%, rgba(230,245,255,0.3), rgba(200,225,240,0.1));
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* HEADER (fully responsive) */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 4%;
+      background: rgba(10, 20, 30, 0.94);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 1100;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .logo {
+      font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+      font-weight: 800;
+      color: white;
+      letter-spacing: 1px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .logo span { color: var(--accent-green); }
+
+    nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      list-style: none;
+      align-items: center;
+    }
+    nav ul li a {
+      text-decoration: none;
+      color: #f0f0f0;
+      font-weight: 500;
+      font-size: clamp(0.55rem, 1vw, 0.75rem);
+      padding: 5px 10px;
+      border-radius: 30px;
+      transition: 0.2s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    nav ul li.active a,
+    nav ul li a:hover {
+      background: var(--accent-green);
+      color: #111;
+    }
+
+    .btn-logout {
+      background: #ff4d4d;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 40px;
+      color: white;
+      font-weight: 600;
+      font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+      cursor: pointer;
+      transition: 0.2s;
+      white-space: nowrap;
+    }
+    .btn-logout:hover { background: #ff6b6b; }
+
+    .main-content { padding: 20px 4% 50px; }
+
+    .admin-section { animation: fadeSlide 0.3s ease; }
+    @keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .card-container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(4px);
+      border-radius: 28px;
+      padding: 20px 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.6);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    h3 {
+      font-weight: 700;
+      margin-bottom: 18px;
+      border-left: 6px solid var(--accent-green);
+      padding-left: 14px;
+      color: var(--dark-text);
+      font-size: clamp(1rem, 2vw, 1.3rem);
+    }
+
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 24px;
+      padding: 16px 8px;
+      text-align: center;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+      border-bottom: 4px solid var(--primary);
+    }
+    .stat-card i { font-size: 30px; color: var(--primary); }
+    .stat-card h4 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; }
+    .stat-card p { font-size: clamp(0.6rem, 0.8vw, 0.75rem); color: #555; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      background: #f9fbfe;
+      padding: 18px;
+      border-radius: 24px;
+      margin-bottom: 24px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    label {
+      font-weight: 600;
+      font-size: clamp(0.6rem, 0.8vw, 0.7rem);
+      color: #333;
+    }
+    input, select, textarea {
+      padding: 8px 12px;
+      border-radius: 18px;
+      border: 1px solid #ddd;
+      transition: 0.2s;
+      font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+      width: 100%;
+    }
+    input:focus, select:focus {
+      border-color: var(--accent-green);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(46,204,113,0.2);
+    }
+
+    .btn-primary {
+      background: var(--accent-green);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+      transition: 0.2s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-danger { background: var(--danger); }
+    .btn-sm { padding: 4px 12px; font-size: clamp(0.5rem, 0.7vw, 0.65rem); border-radius: 30px; margin: 2px; }
+    .btn-warning { background: var(--warning); color: white; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(0.65rem, 0.8vw, 0.8rem);
+      min-width: 500px;
+    }
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    th { background: #f0f4f9; font-weight: 600; }
+
+    .role-badge {
+      padding: 3px 10px;
+      border-radius: 30px;
+      font-size: clamp(0.5rem, 0.6vw, 0.6rem);
+      font-weight: bold;
+    }
+    .role-admin { background: #fce4d6; color: #e67e22; }
+    .role-emp { background: #d4e6f1; color: #2471a3; }
+    .role-user { background: #d5f5e3; color: #1e8449; }
+
+    .status-paid { background: #d5f5e3; color: #145a32; padding: 3px 10px; border-radius: 30px; font-size: clamp(0.5rem, 0.6vw, 0.6rem); }
+    .status-pending { background: #fef9e7; color: #b7950b; }
+
+    .feedback-card {
+      background: #fffdf7;
+      border-radius: 18px;
+      margin-bottom: 14px;
+      padding: 14px;
+      border-left: 5px solid var(--primary);
+      font-size: clamp(0.7rem, 0.8vw, 0.85rem);
+    }
+    .clickable-row {
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+    .clickable-row:hover { background: rgba(46,204,113,0.12); }
+
+    .reply-box-admin {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hidden { display: none !important; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--dark-text);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 14px;
+      font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+      font-weight: 600;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: 0.4s;
+      z-index: 9999;
+      max-width: 300px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #2ecc71; }
+    .toast.error { background: #e74c3c; }
+
+    footer {
+      background: #0a1922;
+      color: #bbb;
+      padding: 24px 4% 16px;
+      text-align: center;
+      font-size: clamp(0.6rem, 0.7vw, 0.75rem);
+    }
+
+    /* responsive tweaks */
+    @media (max-width: 750px) {
+      .main-content { padding: 16px 3%; }
+      nav ul { gap: 2px; }
+      nav ul li a { font-size: 0.55rem; padding: 4px 8px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .dashboard-stats { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 500px) {
+      header { flex-direction: column; align-items: stretch; gap: 6px; }
+      nav ul { justify-content: center; }
+      .btn-logout { align-self: flex-end; }
+      .dashboard-stats { grid-template-columns: 1fr; }
+      .stat-card { padding: 12px 6px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo" onclick="window.location.href='index.html'">TRAVE<span>LER</span> ADMIN</div>
+    <nav>
+      <ul id="adminNav">
+        <li id="nav-dashboard" class="active"><a onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+        <li id="nav-packages"><a onclick="showSection('packages')"><i class="fas fa-box"></i> <span>Packages</span></a></li>
+        <li id="nav-destinations"><a onclick="showSection('destinations')"><i class="fas fa-map"></i> <span>Destinations</span></a></li>
+        <li id="nav-users"><a onclick="showSection('users')"><i class="fas fa-users"></i> <span>Users</span></a></li>
+        <li id="nav-bookings"><a onclick="showSection('bookings')"><i class="fas fa-ticket-alt"></i> <span>Bookings</span></a></li>
+        <li id="nav-feedback"><a onclick="showSection('feedback')"><i class="fas fa-star"></i> <span>Feedback</span></a></li>
+        <li id="nav-payments"><a onclick="showSection('payments')"><i class="fas fa-credit-card"></i> <span>Payments</span></a></li>
+        <li id="nav-inquiries"><a onclick="showSection('inquiries')"><i class="fas fa-question-circle"></i> <span>Inquiries</span></a></li>
+      </ul>
+    </nav>
+    <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Exit</button>
+  </header>
+
+  <div class="main-content">
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="admin-section">
+      <div class="card-container">
+        <h3>📊 Executive Overview</h3>
+        <div class="dashboard-stats">
+          <div class="stat-card"><i class="fas fa-boxes"></i><h4 id="totalPackagesStat">0</h4><p>Packages</p></div>
+          <div class="stat-card"><i class="fas fa-users"></i><h4 id="totalUsersStat">0</h4><p>Users</p></div>
+          <div class="stat-card"><i class="fas fa-location-dot"></i><h4 id="totalDestinationsStat">0</h4><p>Destinations</p></div>
+          <div class="stat-card"><i class="fas fa-calendar-check"></i><h4 id="totalBookingsStat">0</h4><p>Bookings</p></div>
+        </div>
+        <canvas id="adminChart" height="180" style="max-height:220px; width:100%"></canvas>
+      </div>
+    </div>
+
+    <!-- PACKAGES -->
+    <div id="packages" class="admin-section hidden">
+      <div class="card-container">
+        <h3>✈️ Packages CRUD + Click row to edit</h3>
+        <form id="packageForm" class="form-grid">
+          <input type="hidden" id="editPackageId">
+          <div class="input-group"><label>Package Name</label><input type="text" id="pkgName" placeholder="Dream Escape" required></div>
+          <div class="input-group"><label>Category</label><select id="pkgCategory"><option>Beach</option><option>Adventure</option><option>Honeymoon</option><option>Cultural</option></select></div>
+          <div class="input-group"><label>Country</label><input type="text" id="pkgCountry" required></div>
+          <div class="input-group"><label>City</label><input type="text" id="pkgCity" required></div>
+          <div class="input-group"><label>Price ($)</label><input type="number" id="pkgPrice" required></div>
+          <div class="input-group"><label>Image URL</label><input type="text" id="pkgImg" placeholder="https://..."></div>
+          <div class="input-group"><label>Advantages (comma)</label><input type="text" id="pkgAdv" placeholder="Pool, WiFi, Guide"></div>
+          <div class="input-group" style="grid-column:1/-1; display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn-primary" id="savePackageBtn">💾 Save</button>
+            <button type="button" class="btn-primary btn-danger" id="cancelPackageEdit">✖ Cancel</button>
+          </div>
+        </form>
+        <div style="overflow-x:auto;">
+          <table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead><tbody id="packagesManageTable"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESTINATIONS -->
+    <div id="destinations" class="admin-section hidden">
+      <div class="card-container">
+        <h3>🏝️ Destinations (Trip Cards)</h3>
+        <form id="destForm" class="form-grid">
+          <input type="hidden" id="editDestId">
+          <div class="input-group"><label>City</label><input type="text" id="destCity" required></div>
+          <div class="input-group"><label>Name</label><input type="text" id="destName" required></div>
+          <div class="input-group"><label>Price/Night</label><input type="number" id="destPrice" required></div>
+          <div class="input-group"><label>Image URL</label><input type="text" id="destImg"></div>
+          <div class="input-group"><label>Description</label><textarea id="destDesc" rows="2"></textarea></div>
+          <div class="input-group"><label>Features (comma)</label><input type="text" id="destFeatures"></div>
+          <div class="input-group" style="grid-column:1/-1; display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn-primary" id="saveDestBtn">💾 Save</button>
+            <button type="button" class="btn-primary btn-danger" id="cancelDestEdit">Cancel</button>
+          </div>
+        </form>
+        <table><thead><tr><th>City</th><th>Name</th><th>Price</th><th>Actions</th></tr></thead><tbody id="destinationsTableBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div id="users" class="admin-section hidden">
+      <div class="card-container">
+        <h3>👥 User Management (Click row → load into form)</h3>
+        <form id="userForm" class="form-grid">
+          <div class="input-group"><label>Full Name</label><input type="text" id="userFullName" required></div>
+          <div class="input-group"><label>Email</label><input type="email" id="userEmail" required></div>
+          <div class="input-group"><label>Role</label><select id="userRoleSelect"><option>USER</option><option>EMPLOYEE</option><option>ADMIN</option></select></div>
+          <div class="input-group" style="grid-column:1/-1; display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn-primary" id="addUpdateUserBtn">➕ Add / Update</button>
+            <input type="hidden" id="editUserId">
+          </div>
+        </form>
+        <table><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Delete</th></tr></thead><tbody id="usersTableBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- BOOKINGS -->
+    <div id="bookings" class="admin-section hidden">
+      <div class="card-container">
+        <h3>📅 Bookings Management (Click row to edit inline)</h3>
+        <button class="btn-primary btn-sm" id="showAddBookingBtn" style="margin-bottom:12px;"><i class="fas fa-plus"></i> Add New Booking</button>
+        <div id="addBookingFormContainer" class="hidden form-grid" style="background:#eef2fa; margin-bottom:18px;">
+          <input type="text" id="newBookingGuest" placeholder="Guest Name">
+          <input type="text" id="newBookingTitle" placeholder="Package/Destination">
+          <input type="date" id="newBookingStart">
+          <input type="date" id="newBookingEnd">
+          <input type="number" id="newBookingPrice" placeholder="Total Price">
+          <select id="newBookingStatus"><option>Confirmed</option><option>Pending</option><option>Cancelled</option></select>
+          <button class="btn-primary" id="confirmAddBookingBtn">Add</button>
+          <button class="btn-danger btn-primary" id="cancelAddBookingBtn">Cancel</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table><thead><tr><th>ID</th><th>Guest</th><th>Package/Trip</th><th>Dates</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody id="bookingsTableBody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div id="feedback" class="admin-section hidden">
+      <div class="card-container">
+        <h3>⭐ Customer Feedback & Admin Reply</h3>
+        <div id="feedbackListContainer"></div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div id="payments" class="admin-section hidden">
+      <div class="card-container">
+        <h3>💳 Transactions</h3>
+        <table><thead><tr><th>BookingID</th><th>Guest</th><th>Amount</th><th>Method</th><th>Status</th><th>Receipt</th></tr></thead><tbody id="paymentsTableBody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- INQUIRIES -->
+    <div id="inquiries" class="admin-section hidden">
+      <div class="card-container">
+        <h3>📩 Inquiries + Admin Reply (Instant)</h3>
+        <table><thead><tr><th>User</th><th>Message</th><th>Date</th><th>Reply Text</th><th>Status</th><th>Action</th></tr></thead><tbody id="inquiriesTableBody"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <footer><div>© Traveler Suite — Admin Full Control | Responsive & Complete CRUD</div></footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ======================== GLOBAL DATA & HELPERS ========================
+    const API = 'http://localhost:8080/api';
+    function getToken() { return localStorage.getItem('traveler_token'); }
+    function authHeaders() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }; }
+    function showToast(msg, type='success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ' + type;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    // ─── AUTH GUARD ───────────────────────────────────────────────────────
+    const user = (() => { try { return JSON.parse(localStorage.getItem('traveler_user')); } catch { return null; } })();
+    if (!user || user.role !== 'ROLE_ADMIN') { window.location.href = 'index.html'; }
+
+    let packagesList = [], usersList = [], inquiriesList = [], destinationsList = [], bookingsList = [];
+
+    // ─── LOAD DATA ──────────────────────────────────────────────────────────
+    async function loadAllData() {
+      try {
+        const pkgRes = await fetch(`${API}/packages`, { headers: authHeaders() });
+        if (pkgRes.ok) {
+          const data = await pkgRes.json();
+          packagesList = data.map(p => ({ id:p.id, name:p.title, category:'Package', country:'Sri Lanka', city:'Colombo', price:p.price, img:p.imageUrl||'', advantages:[], offer:p.offer }));
+          localStorage.setItem('travelPackages', JSON.stringify(packagesList));
+        } else packagesList = JSON.parse(localStorage.getItem('travelPackages') || '[]');
+
+        const destRes = await fetch(`${API}/destinations`, { headers: authHeaders() });
+        if (destRes.ok) {
+          const data = await destRes.json();
+          destinationsList = data.map(d => ({ id:d.id, city:d.town||d.country, name:d.name, price:299, img:d.imageUrl||'', desc:d.description, features:[d.type] }));
+          localStorage.setItem('travelDestinations', JSON.stringify(destinationsList));
+        } else destinationsList = JSON.parse(localStorage.getItem('travelDestinations') || '[]');
+
+        const userRes = await fetch(`${API}/admin/users`, { headers: authHeaders() });
+        if (userRes.ok) {
+          const data = await userRes.json();
+          usersList = data.map(u => ({ id:u.id, name:u.name, email:u.email, role: u.roles?.includes('ROLE_ADMIN') ? 'ADMIN' : (u.roles?.includes('ROLE_EMPLOYEE') ? 'EMPLOYEE' : 'USER') }));
+          localStorage.setItem('travelUsers', JSON.stringify(usersList));
+        } else usersList = JSON.parse(localStorage.getItem('travelUsers') || '[]');
+
+        const inqRes = await fetch(`${API}/inquiries`, { headers: authHeaders() });
+        if (inqRes.ok) {
+          const data = await inqRes.json();
+          inquiriesList = data.map(i => ({ id:i.id, user:i.userName, message:i.message, date:i.createdAt, reply:i.adminReply||'', replied:!!i.adminReply }));
+          localStorage.setItem('travelInquiries', JSON.stringify(inquiriesList));
+        } else inquiriesList = JSON.parse(localStorage.getItem('travelInquiries') || '[]');
+
+        const bkRes = await fetch(`${API}/bookings`, { headers: authHeaders() });
+        if (bkRes.ok) {
+          bookingsList = await bkRes.json();
+          const mapped = bookingsList.map(b => ({
+            id: b.bookingRef || `B${b.id}`, guestName: b.fullName,
+            title: b.itemName, startDate: b.startDate, endDate: b.endDate,
+            price: b.totalPrice, status: b.status, bookingDate: b.createdAt,
+            paymentMethod: b.paymentMethod, backendId: b.id,
+            calendarEventId: b.calendarEventId
+          }));
+          localStorage.setItem('userBookings', JSON.stringify(mapped));
+        }
+      } catch(e) { console.warn('API fallback:', e.message); }
+      syncAllStorage();
+    }
+
+    function syncAllStorage() {
+      localStorage.setItem('travelPackages', JSON.stringify(packagesList));
+      localStorage.setItem('travelUsers', JSON.stringify(usersList));
+      localStorage.setItem('travelInquiries', JSON.stringify(inquiriesList));
+      localStorage.setItem('travelDestinations', JSON.stringify(destinationsList));
+      updateStats();
+    }
+
+    function syncPackages() { localStorage.setItem('travelPackages', JSON.stringify(packagesList)); renderPackagesTable(); updateStats(); }
+    function syncUsers() { localStorage.setItem('travelUsers', JSON.stringify(usersList)); renderUsersTable(); updateStats(); }
+    function syncDestinations() { localStorage.setItem('travelDestinations', JSON.stringify(destinationsList)); renderDestinationsTable(); updateStats(); }
+    function syncInquiries() { localStorage.setItem('travelInquiries', JSON.stringify(inquiriesList)); renderInquiriesTable(); }
+
+    // ========== TABLE RENDERS with CLICK-TO-EDIT ==========
+    function renderPackagesTable() {
+      const tbody = document.getElementById('packagesManageTable');
+      if(tbody) tbody.innerHTML = packagesList.map(p => `<tr class="clickable-row" data-id="${p.id}" data-type="package"><td>${p.id}</td><td>${p.name}</td><td>${p.category}</td><td>$${p.price}</td><td><button class="btn-primary btn-sm" onclick="event.stopPropagation(); deletePackage(${p.id})">🗑️ Del</button></td></tr>`).join('');
+      attachRowClick('.clickable-row[data-type="package"]', (data) => editPackageForm(data.id));
+    }
+
+    function editPackageForm(id) { const p = packagesList.find(p=>p.id==id); if(p){ document.getElementById('editPackageId').value=p.id; document.getElementById('pkgName').value=p.name; document.getElementById('pkgCategory').value=p.category; document.getElementById('pkgCountry').value=p.country||'Sri Lanka'; document.getElementById('pkgCity').value=p.city||'Colombo'; document.getElementById('pkgPrice').value=p.price; document.getElementById('pkgImg').value=p.img||''; document.getElementById('pkgAdv').value=(p.advantages||[]).join(','); } }
+
+    window.deletePackage = async (id) => {
+      if(!confirm('Delete package?')) return;
+      try { await fetch(`${API}/packages/${id}`, { method:'DELETE', headers:authHeaders() }); } catch {}
+      packagesList = packagesList.filter(p=>p.id!=id); syncPackages(); updateStats();
+      showToast('Package deleted');
+    };
+
+    document.getElementById('savePackageBtn').addEventListener('click', async ()=>{
+      const id = document.getElementById('editPackageId').value;
+      const name = document.getElementById('pkgName').value.trim();
+      const category = document.getElementById('pkgCategory').value;
+      const country = document.getElementById('pkgCountry').value.trim();
+      const city = document.getElementById('pkgCity').value.trim();
+      const price = parseFloat(document.getElementById('pkgPrice').value);
+      const img = document.getElementById('pkgImg').value.trim() || 'https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=600';
+      const adv = document.getElementById('pkgAdv').value.split(',').map(s=>s.trim());
+      if(!name||!country||!city||isNaN(price)) return showToast('Fill required fields', 'error');
+      const pkgData = { title:name, category, price, imageUrl:img, advantages:adv, country, city };
+      if(id){
+        try { await fetch(`${API}/packages/${id}`, { method:'PUT', headers:authHeaders(), body:JSON.stringify(pkgData) }); } catch {}
+        const idx = packagesList.findIndex(p=>p.id==id);
+        if(idx!==-1) packagesList[idx] = {...packagesList[idx], name, category, country, city, price, img, advantages:adv};
+      } else {
+        try { const res = await fetch(`${API}/packages`, { method:'POST', headers:authHeaders(), body:JSON.stringify(pkgData) }); if(res.ok){ const data=await res.json(); packagesList.push({id:data.id||Date.now(), name, category, country, city, price, img, advantages:adv}); } } catch {}
+      }
+      syncPackages(); document.getElementById('packageForm').reset(); document.getElementById('editPackageId').value=''; showToast('Package saved');
+    });
+
+    document.getElementById('cancelPackageEdit').addEventListener('click',()=>{ document.getElementById('packageForm').reset(); document.getElementById('editPackageId').value=''; });
+
+    // ─── DESTINATIONS ─────────────────────────────────────────────────────
+    function renderDestinationsTable() { const tbody=document.getElementById('destinationsTableBody'); if(tbody) tbody.innerHTML=destinationsList.map(d=>`<tr class="clickable-row" data-dest-id="${d.id}" data-type="dest"><td>${d.city}</td><td>${d.name}</td><td>$${d.price}</td><td><button class="btn-sm btn-danger" onclick="event.stopPropagation(); deleteDestination(${d.id})">Del</button></td></tr>`).join(''); attachRowClick('.clickable-row[data-type="dest"]', (data) => fillDestForm(data.id)); }
+
+    function fillDestForm(id){ const d=destinationsList.find(d=>d.id==id); if(d){ document.getElementById('editDestId').value=d.id; document.getElementById('destCity').value=d.city; document.getElementById('destName').value=d.name; document.getElementById('destPrice').value=d.price; document.getElementById('destImg').value=d.img||''; document.getElementById('destDesc').value=d.desc||''; document.getElementById('destFeatures').value=(d.features||[]).join(','); } }
+
+    window.deleteDestination = async (id)=>{ if(!confirm('Delete destination?')) return; try { await fetch(`${API}/destinations/${id}`,{method:'DELETE',headers:authHeaders()}); } catch{} destinationsList=destinationsList.filter(d=>d.id!==id); syncDestinations(); updateStats(); showToast('Destination deleted'); };
+
+    document.getElementById('saveDestBtn').addEventListener('click', async ()=>{
+      const id=document.getElementById('editDestId').value;
+      const city=document.getElementById('destCity').value.trim();
+      const name=document.getElementById('destName').value.trim();
+      const price=parseFloat(document.getElementById('destPrice').value);
+      const img=document.getElementById('destImg').value.trim();
+      const desc=document.getElementById('destDesc').value.trim();
+      const features=document.getElementById('destFeatures').value.split(',').map(s=>s.trim());
+      if(!city||!name||isNaN(price)) return showToast('Missing fields', 'error');
+      const destData = { name, town:city, imageUrl:img, description:desc, type:features[0]||'General', price };
+      if(id){
+        try { await fetch(`${API}/destinations/${id}`, { method:'PUT', headers:authHeaders(), body:JSON.stringify(destData) }); } catch {}
+        const idx=destinationsList.findIndex(d=>d.id==id);
+        if(idx!==-1) destinationsList[idx]={...destinationsList[idx], city, name, price, img, desc, features};
+      } else {
+        try { const res = await fetch(`${API}/destinations`, { method:'POST', headers:authHeaders(), body:JSON.stringify(destData) }); if(res.ok){ const data=await res.json(); destinationsList.push({id:data.id||Date.now(), city, name, price, img, desc, features}); } } catch {}
+      }
+      syncDestinations(); document.getElementById('destForm').reset(); document.getElementById('editDestId').value=''; showToast('Destination saved');
+    });
+
+    document.getElementById('cancelDestEdit').addEventListener('click',()=>{document.getElementById('destForm').reset();document.getElementById('editDestId').value='';});
+
+    // ─── USERS ────────────────────────────────────────────────────────────
+    function renderUsersTable(){ const tbody=document.getElementById('usersTableBody'); if(tbody) tbody.innerHTML=usersList.map(u=>`<tr class="clickable-row" data-user-id="${u.id}" data-type="user"><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td><span class="role-badge role-${u.role==='ADMIN'?'admin':(u.role==='EMPLOYEE'?'emp':'user')}">${u.role}</span></td><td><button class="btn-sm btn-danger" onclick="event.stopPropagation(); deleteUser(${u.id})">🗑️</button></td></tr>`).join(''); attachRowClick('.clickable-row[data-type="user"]', (data) => loadUserToForm(data.id)); }
+
+    function loadUserToForm(id){ const u=usersList.find(u=>u.id==id); if(u){ document.getElementById('editUserId').value=u.id; document.getElementById('userFullName').value=u.name; document.getElementById('userEmail').value=u.email; document.getElementById('userRoleSelect').value=u.role; } }
+
+    window.deleteUser = async (id)=>{ if(!confirm('Delete user?')) return; try { await fetch(`${API}/admin/users/${id}`,{method:'DELETE',headers:authHeaders()}); } catch{} usersList=usersList.filter(u=>u.id!==id); syncUsers(); updateStats(); showToast('User deleted'); };
+
+    document.getElementById('addUpdateUserBtn').addEventListener('click', async ()=>{
+      const id=document.getElementById('editUserId').value;
+      const name=document.getElementById('userFullName').value.trim();
+      const email=document.getElementById('userEmail').value.trim();
+      const role=document.getElementById('userRoleSelect').value;
+      if(!name||!email) return showToast('Fill data', 'error');
+      const userData = { name, email, roles: [role] };
+      if(id){
+        try { await fetch(`${API}/admin/users/${id}`, { method:'PUT', headers:authHeaders(), body:JSON.stringify(userData) }); } catch {}
+        const idx=usersList.findIndex(u=>u.id==id);
+        if(idx!==-1) usersList[idx]={...usersList[idx], name, email, role};
+      } else {
+        try { const res = await fetch(`${API}/admin/users`, { method:'POST', headers:authHeaders(), body:JSON.stringify(userData) }); if(res.ok){ const data=await res.json(); usersList.push({id:data.id||Date.now(), name, email, role}); } } catch {}
+      }
+      syncUsers(); document.getElementById('userForm').reset(); document.getElementById('editUserId').value=''; showToast('User saved');
+    });
+
+    // ─── BOOKINGS ─────────────────────────────────────────────────────────
+    function getBookings() { return JSON.parse(localStorage.getItem('userBookings')||'[]'); }
+    function saveBookings(bookings) { localStorage.setItem('userBookings',JSON.stringify(bookings)); renderBookingsTable(); renderPaymentsTable(); updateStats(); }
+
+    function renderBookingsTable(){ const bookings=getBookings(); const tbody=document.getElementById('bookingsTableBody'); if(tbody) tbody.innerHTML=bookings.map(b=>`<tr class="clickable-row" data-booking-id="${b.id}" data-type="booking"><td>${b.id}${b.calendarEventId?` <i class="fas fa-calendar-check" title="In Calendar" style="color:#2ecc71;font-size:11px;"></i>`:''}</td><td>${b.guestName}</td><td>${b.title}</td><td>${b.startDate} → ${b.endDate}</td><td>$${b.price}</td><td><select class="booking-status-select" data-id="${b.id}" data-backend-id="${b.backendId||''}" style="padding:4px 8px;border-radius:30px;font-size:clamp(0.55rem,0.7vw,0.7rem);">${['confirmed','pending','cancelled'].map(st=>`<option value="${st}" ${(b.status||'').toLowerCase()===st?'selected':''}>${st.charAt(0).toUpperCase()+st.slice(1)}</option>`).join('')}</select></td><td><button class="btn-sm btn-danger" onclick="deleteBookingRow('${b.id}',${b.backendId||'null'})">Delete</button></td></tr>`).join('');
+      document.querySelectorAll('.booking-status-select').forEach(sel=>{ sel.addEventListener('change',async(e)=>{ let bk=getBookings(); const bid=e.target.dataset.id; const backendId=e.target.dataset.backendId; const found=bk.find(b=>b.id==bid); if(found){ found.status=e.target.value; if(backendId){ try{ await fetch(`${API}/bookings/${backendId}/status`,{method:'PUT',headers:authHeaders(),body:JSON.stringify({status:e.target.value})}); }catch{} } saveBookings(bk); showToast('Status updated'); } }); }); }
+
+    function addNewBooking(){ const guest=document.getElementById('newBookingGuest').value.trim(); const title=document.getElementById('newBookingTitle').value.trim(); const start=document.getElementById('newBookingStart').value; const end=document.getElementById('newBookingEnd').value; const price=parseFloat(document.getElementById('newBookingPrice').value); const status=document.getElementById('newBookingStatus').value; if(!guest||!title||!start||!end||isNaN(price)) return showToast('All fields required', 'error'); const bk=getBookings(); const newId="B"+Date.now(); bk.push({ id:newId, guestName:guest, title, startDate:start, endDate:end, price, status, bookingDate:new Date().toLocaleString(), paymentMethod:"card" }); saveBookings(bk); showToast('Booking added'); document.getElementById('addBookingFormContainer').classList.add('hidden'); }
+
+    document.getElementById('showAddBookingBtn').addEventListener('click',()=>{ document.getElementById('addBookingFormContainer').classList.remove('hidden'); });
+    document.getElementById('confirmAddBookingBtn').addEventListener('click',addNewBooking);
+    document.getElementById('cancelAddBookingBtn').addEventListener('click',()=>{ document.getElementById('addBookingFormContainer').classList.add('hidden'); });
+
+    window.deleteBookingRow = async (id, backendId)=>{ if (!confirm('Delete this booking?')) return; if (backendId) { try { await fetch(`${API}/bookings/${backendId}`,{method:'DELETE',headers:authHeaders()}); } catch {} } let bk=getBookings(); bk=bk.filter(b=>b.id!==id); saveBookings(bk); showToast('Booking deleted'); };
+
+    // ─── FEEDBACK ─────────────────────────────────────────────────────────
+    function renderFeedbackWithReply(){ const fb=JSON.parse(localStorage.getItem('placeFeedbacks')||'{}'); const container=document.getElementById('feedbackListContainer'); if(!container) return; let html=''; for(const [place, msgs] of Object.entries(fb)){ html+=`<div class="feedback-card"><h4><i class="fas fa-map-marker-alt"></i> ${place}</h4>`; msgs.forEach((f,idx)=>{ const replyId=`reply_${place.replace(/[^a-z0-9]/gi,'_')}_${idx}`; const existing=f.adminReply||''; html+=`<div><strong>${f.user}</strong>: ${f.msg} <small>${f.date}</small><div class="reply-box-admin"><input type="text" id="${replyId}" value="${existing.replace(/"/g, '&quot;')}" placeholder="Type admin reply..." style="flex:1;padding:6px 12px;border-radius:40px;font-size:clamp(0.6rem,0.8vw,0.75rem);"><button class="btn-primary btn-sm" onclick="submitFeedbackReply('${place}',${idx},'${replyId}')">Send Reply</button></div>${existing?`<div style="background:#e8f5e9;border-radius:16px;padding:4px 12px;margin-top:4px;"><i class="fas fa-reply"></i> Admin: ${existing}</div>`:''}</div><hr style="margin:10px 0;">`; }); html+=`</div>`; } container.innerHTML=html||'<p>No feedback yet.</p>'; }
+
+    window.submitFeedbackReply=(place,idx,inputId)=>{ const replyText=document.getElementById(inputId)?.value.trim(); if(!replyText) return showToast('Please write a reply', 'error'); let feedbacks=JSON.parse(localStorage.getItem('placeFeedbacks')||'{}'); if(feedbacks[place] && feedbacks[place][idx]){ feedbacks[place][idx].adminReply=replyText; localStorage.setItem('placeFeedbacks',JSON.stringify(feedbacks)); renderFeedbackWithReply(); showToast('Reply published for feedback'); } };
+
+    // ─── INQUIRIES ────────────────────────────────────────────────────────
+    function renderInquiriesTable(){ const tbody=document.getElementById('inquiriesTableBody'); if(tbody) tbody.innerHTML=inquiriesList.map(i=>`<tr><td>${i.user}</td><td>${i.message}</td><td>${i.date}</td><td><input type="text" id="inqReply_${i.id}" value="${(i.reply||'').replace(/"/g,'&quot;')}" style="width:180px;padding:6px 12px;border-radius:40px;font-size:clamp(0.6rem,0.8vw,0.75rem);"></td><td>${i.reply?'<span class="status-paid">Replied</span>':'<span class="status-pending">Pending</span>'}</td><td><button class="btn-primary btn-sm" onclick="submitInquiryReply(${i.id})">📨 Send</button></td></tr>`).join(''); }
+
+    window.submitInquiryReply = async (id)=>{
+      const replyMsg = document.getElementById(`inqReply_${id}`).value.trim();
+      if (!replyMsg) return showToast('Enter reply', 'error');
+      try { await fetch(`${API}/inquiries/${id}/reply`, { method:'PUT', headers:authHeaders(), body:JSON.stringify({reply:replyMsg}) }); } catch {}
+      const inquiry=inquiriesList.find(i=>i.id===id);
+      if(inquiry){ inquiry.reply=replyMsg; inquiry.replied=true; syncInquiries(); renderInquiriesTable(); showToast(`Reply sent to ${inquiry.user}`); }
+    };
+
+    // ─── PAYMENTS ─────────────────────────────────────────────────────────
+    function renderPaymentsTable(){ const bookings=getBookings(); const tbody=document.getElementById('paymentsTableBody'); if(tbody) tbody.innerHTML=bookings.map(b=>`<tr><td>${b.id}</td><td>${b.guestName}</td><td>$${b.price}</td><td>${b.paymentMethod==='card'?'💳 Card':'💵 Cash'}</td><td><span class="status-paid">PAID</span></td><td><button class="btn-sm" onclick="alert('Receipt for ${b.id}\\nTotal $${b.price}\\nStatus ${b.status}')">🧾 Receipt</button></td></tr>`).join(''); }
+
+    // ─── STATS ────────────────────────────────────────────────────────────
+    async function updateStats(){
+      const bookingsCount=getBookings().length;
+      try {
+        const res = await fetch(`${API}/admin/dashboard`,{headers:authHeaders()});
+        if (res.ok) {
+          const d = await res.json();
+          document.getElementById('totalPackagesStat').innerText     = d.totalPackages     || packagesList.length;
+          document.getElementById('totalUsersStat').innerText        = d.totalUsers        || usersList.length;
+          document.getElementById('totalDestinationsStat').innerText = d.totalDestinations || destinationsList.length;
+          document.getElementById('totalBookingsStat').innerText     = d.totalBookings     || bookingsCount;
+          if(window.myChart) window.myChart.destroy();
+          const ctx=document.getElementById('adminChart')?.getContext('2d');
+          if(ctx){ window.myChart=new Chart(ctx,{type:'bar',data:{labels:['Packages','Users','Destinations','Bookings'],datasets:[{label:'Count',data:[d.totalPackages||packagesList.length,d.totalUsers||usersList.length,d.totalDestinations||destinationsList.length,d.totalBookings||bookingsCount],backgroundColor:['#2c7da0','#2ecc71','#e67e22','#9b59b6'],borderRadius:12}]},options:{responsive:true,maintainAspectRatio:true}}); }
+          return;
+        }
+      } catch {}
+      document.getElementById('totalPackagesStat').innerText=packagesList.length;
+      document.getElementById('totalUsersStat').innerText=usersList.length;
+      document.getElementById('totalDestinationsStat').innerText=destinationsList.length;
+      document.getElementById('totalBookingsStat').innerText=bookingsCount;
+      if(window.myChart) window.myChart.destroy();
+      const ctx=document.getElementById('adminChart')?.getContext('2d');
+      if(ctx){ window.myChart=new Chart(ctx,{type:'bar',data:{labels:['Packages','Users','Destinations','Bookings'],datasets:[{label:'Count',data:[packagesList.length,usersList.length,destinationsList.length,bookingsCount],backgroundColor:['#2c7da0','#2ecc71','#e67e22','#9b59b6'],borderRadius:12}]},options:{responsive:true,maintainAspectRatio:true}}); }
+    }
+
+    // ─── ROW CLICK HANDLER ──────────────────────────────────────────────
+    function attachRowClick(selector, callback){
+      document.querySelectorAll(selector).forEach(el=>{
+        el.removeEventListener('click', rowHandler);
+        el.addEventListener('click', rowHandler);
+        function rowHandler(e){ if(e.target.tagName==='BUTTON'||e.target.tagName==='SELECT') return; const id=el.getAttribute('data-id')||el.getAttribute('data-dest-id')||el.getAttribute('data-user-id')||el.getAttribute('data-booking-id'); if(id) callback({id: (el.getAttribute('data-type')==='booking'? id : parseInt(id)) }); }
+      });
+    }
+
+    // ─── SECTION SWITCHING ──────────────────────────────────────────────
+    function showSection(sectionId){
+      document.querySelectorAll('.admin-section').forEach(s=>s.classList.add('hidden'));
+      document.getElementById(sectionId).classList.remove('hidden');
+      document.querySelectorAll('#adminNav li').forEach(li=>li.classList.remove('active'));
+      const activeNav=document.getElementById('nav-'+sectionId);
+      if(activeNav) activeNav.classList.add('active');
+      if(sectionId==='packages') renderPackagesTable();
+      if(sectionId==='destinations') renderDestinationsTable();
+      if(sectionId==='users') renderUsersTable();
+      if(sectionId==='bookings') renderBookingsTable();
+      if(sectionId==='feedback') renderFeedbackWithReply();
+      if(sectionId==='payments') renderPaymentsTable();
+      if(sectionId==='inquiries') renderInquiriesTable();
+      if(sectionId==='dashboard') updateStats();
+    }
+
+    function handleLogout(){ if(confirm("Exit admin panel?")) window.location.href="index.html"; }
+
+    async function init(){
+      await loadAllData();
+      renderPackagesTable(); renderDestinationsTable(); renderUsersTable();
+      renderInquiriesTable(); renderBookingsTable(); renderFeedbackWithReply();
+      renderPaymentsTable(); updateStats(); showSection('dashboard');
+    }
+    init();
+  </script>
+</body>
+</html>
