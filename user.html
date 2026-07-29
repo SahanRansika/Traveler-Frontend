@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Traveler | Plan Your Trip</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f0f4f8;
+      color: #1e2a41;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+    :root {
+      --primary: #1a6b4a;
+      --primary-light: #2d9b6e;
+      --gold: #c9a84c;
+      --dark: #0f1923;
+      --dark2: #182231;
+      --text: #1e2a41;
+      --text2: #5a6a80;
+      --glass: rgba(255,255,255,0.08);
+      --glass-border: rgba(255,255,255,0.15);
+      --bg: #f0f4f8;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* HEADER (responsive) */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: rgba(15,25,35,0.96);
+      backdrop-filter: blur(20px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 5%;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.1rem, 4vw, 1.6rem);
+      font-weight: 900;
+      color: white;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+    .logo span { color: var(--gold); }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    nav ul li a {
+      color: rgba(255,255,255,0.75);
+      font-weight: 500;
+      font-size: clamp(0.6rem, 1vw, 0.8rem);
+      padding: 6px 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s;
+      display: block;
+      white-space: nowrap;
+    }
+    nav ul li a:hover, nav ul li a.active {
+      background: rgba(201,168,76,0.15);
+      color: var(--gold);
+    }
+
+    .btn-logout {
+      background: #c0392b;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: clamp(0.55rem, 0.8vw, 0.7rem);
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.3s;
+      white-space: nowrap;
+    }
+    .btn-logout:hover { background: #e74c3c; }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      padding: 4px 0;
+    }
+    .hamburger span {
+      width: 22px;
+      height: 2px;
+      background: white;
+      transition: 0.3s;
+      border-radius: 4px;
+    }
+
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      background: var(--dark);
+      padding: 70px 5% 20px;
+      gap: 8px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 999;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 12px 4px 4px;
+      border-radius: 40px;
+    }
+    .user-chip img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+    .user-chip span {
+      color: white;
+      font-size: clamp(0.55rem, 0.8vw, 0.7rem);
+      font-weight: 600;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* LOADING OVERLAY */
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 20px;
+    }
+    .loader-spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { color: white; font-size: clamp(1rem, 2vw, 1.2rem); font-weight: 600; }
+    .loader-sub { color: rgba(255,255,255,0.5); font-size: clamp(0.7rem, 1vw, 0.85rem); }
+    .loader-images {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .loader-img {
+      width: 70px;
+      height: 50px;
+      border-radius: 10px;
+      object-fit: cover;
+      animation: pulse 1.2s ease-in-out infinite alternate;
+    }
+    .loader-img:nth-child(2) { animation-delay: 0.2s; }
+    .loader-img:nth-child(3) { animation-delay: 0.4s; }
+    .loader-img:nth-child(4) { animation-delay: 0.6s; }
+    @keyframes pulse { from{opacity:0.4;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+
+    /* PAGES */
+    .page { display: none; min-height: 100vh; padding-top: 60px; }
+    .page.active { display: block; }
+    .hidden { display: none !important; }
+
+    /* HOME HERO */
+    .home-hero {
+      height: 40vh;
+      min-height: 260px;
+      background: linear-gradient(rgba(15,25,35,0.55), rgba(15,25,35,0.5)),
+        url('https://res.cloudinary.com/dt2xaqo32/image/upload/v1777551088/31395-travel-the-world-ultra-hd-desktop-background-wallpaper-for-4k-uhd_1_fegcnn.jpg') center/cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .home-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      margin-bottom: 6px;
+    }
+    .home-hero h1 span { color: var(--gold); font-style: italic; }
+    .home-hero p {
+      opacity: 0.85;
+      font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+    }
+
+    /* PLANNER */
+    .planner-wrap {
+      max-width: 1100px;
+      margin: -40px auto 40px;
+      padding: 0 16px;
+      position: relative;
+      z-index: 10;
+    }
+    .step-card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-header h2 {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      font-weight: 700;
+      color: var(--text);
+    }
+    .planner-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .input-group label {
+      font-size: clamp(0.55rem, 0.8vw, 0.65rem);
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .input-group select,
+    .input-group input[type="date"] {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 2px solid #e8ecf0;
+      background: white;
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      transition: 0.3s;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      width: 100%;
+    }
+    .input-group select:focus,
+    .input-group input:focus { border-color: var(--primary); outline: none; }
+
+    /* DESTINATIONS GRID */
+    .dest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-top: 16px;
+    }
+    .dest-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      transition: 0.4s;
+      cursor: pointer;
+    }
+    .dest-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.1);
+    }
+    .dest-card-img {
+      position: relative;
+      height: 160px;
+      overflow: hidden;
+    }
+    .dest-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: 0.5s;
+    }
+    .dest-card:hover .dest-card-img img { transform: scale(1.06); }
+    .dest-badge-top {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--gold);
+      color: var(--dark);
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: clamp(0.5rem, 0.7vw, 0.6rem);
+      font-weight: 700;
+    }
+    .dest-card-body { padding: 14px; }
+    .dest-card-body h3 {
+      font-size: clamp(0.9rem, 1.1vw, 1rem);
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+    .dest-price {
+      color: var(--primary);
+      font-size: clamp(1rem, 1.3vw, 1.2rem);
+      font-weight: 700;
+      margin: 6px 0;
+    }
+    .dest-price small {
+      color: var(--text2);
+      font-size: clamp(0.6rem, 0.7vw, 0.7rem);
+      font-weight: 400;
+    }
+    .dest-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 6px 0;
+    }
+    .feat-tag {
+      background: #eef8f2;
+      color: var(--primary);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: clamp(0.5rem, 0.6vw, 0.55rem);
+      font-weight: 600;
+    }
+    .btn-plan {
+      display: block;
+      width: 100%;
+      padding: 9px;
+      text-align: center;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+      font-family: 'DM Sans', sans-serif;
+      margin-top: 10px;
+    }
+    .btn-plan:hover { background: var(--primary-light); }
+
+    /* PACKAGES */
+    .pkg-section { padding: 40px 5%; background: #f0f4f8; }
+    .section-header { margin-bottom: 28px; }
+    .section-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      color: var(--text);
+    }
+    .section-header p {
+      color: var(--text2);
+      font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+      margin-top: 4px;
+    }
+    .search-filter-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 160px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border-radius: 12px;
+      border: 2px solid #e8ecf0;
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      font-family: 'DM Sans', sans-serif;
+      transition: 0.3s;
+      background: white;
+    }
+    .search-box input:focus { border-color: var(--primary); outline: none; }
+    .search-box i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text2);
+      font-size: 14px;
+    }
+    .filter-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: clamp(0.55rem, 0.7vw, 0.65rem);
+      font-weight: 600;
+      cursor: pointer;
+      border: 2px solid #e8ecf0;
+      background: white;
+      color: var(--text2);
+      transition: 0.3s;
+      white-space: nowrap;
+    }
+    .chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .pkg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .pkg-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      transition: 0.4s;
+      cursor: pointer;
+    }
+    .pkg-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.1);
+    }
+    .pkg-img-wrap {
+      position: relative;
+      height: 160px;
+      overflow: hidden;
+    }
+    .pkg-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: 0.5s;
+    }
+    .pkg-card:hover .pkg-img-wrap img { transform: scale(1.06); }
+    .pkg-cat-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(15,25,35,0.8);
+      color: white;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: clamp(0.5rem, 0.6vw, 0.55rem);
+      font-weight: 700;
+    }
+    .pkg-discount-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #e74c3c;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: clamp(0.5rem, 0.6vw, 0.55rem);
+      font-weight: 700;
+    }
+    .pkg-body { padding: 14px; }
+    .pkg-title {
+      font-size: clamp(0.9rem, 1.1vw, 1rem);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pkg-price {
+      font-size: clamp(1.1rem, 1.4vw, 1.3rem);
+      font-weight: 700;
+      color: var(--primary);
+      margin: 6px 0;
+    }
+    .pkg-price span {
+      font-size: clamp(0.6rem, 0.7vw, 0.7rem);
+      color: var(--text2);
+      font-weight: 400;
+    }
+    .pkg-list { list-style: none; margin: 6px 0; }
+    .pkg-list li {
+      font-size: clamp(0.6rem, 0.7vw, 0.7rem);
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .pkg-list li i { color: #2ecc71; font-size: 11px; }
+    .btn-book {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+      font-family: 'DM Sans', sans-serif;
+      margin-top: 10px;
+    }
+    .btn-book:hover { opacity: 0.9; }
+
+    /* BOOKING PAGE */
+    #bookingPage { padding: 70px 5% 50px; background: #f0f4f8; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+      cursor: pointer;
+      margin-bottom: 18px;
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .back-btn:hover { opacity: 0.75; }
+
+    .booking-layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 24px;
+    }
+    .booking-left, .booking-right { display: flex; flex-direction: column; gap: 16px; }
+    .b-card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+    .b-main-img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 10px;
+    }
+    .b-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .b-gallery img {
+      width: 100%;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      border: 2px solid transparent;
+    }
+    .b-gallery img:hover, .b-gallery img.active { border-color: var(--primary); }
+    .b-card h3 {
+      font-size: clamp(0.9rem, 1.1vw, 1rem);
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .b-card h3 i { color: var(--gold); }
+    .b-item-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .b-item-desc {
+      color: var(--text2);
+      font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .transport-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f0f8f4;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .transport-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+    .transport-text strong {
+      font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+      display: block;
+      margin-bottom: 2px;
+    }
+    .transport-text span {
+      font-size: clamp(0.55rem, 0.7vw, 0.65rem);
+      color: var(--text2);
+    }
+    .festival-alert {
+      background: #fff8e1;
+      border-left: 4px solid var(--gold);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: clamp(0.65rem, 0.8vw, 0.75rem);
+      color: #7a5c00;
+    }
+    .places-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .place-item {
+      display: flex;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .place-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .place-item img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .place-item h4 {
+      font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+      font-weight: 700;
+      margin-bottom: 2px;
+      color: var(--primary);
+    }
+    .place-item p {
+      font-size: clamp(0.55rem, 0.7vw, 0.65rem);
+      color: var(--text2);
+    }
+    .place-badge {
+      display: inline-block;
+      background: #eef8f2;
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 15px;
+      font-size: clamp(0.5rem, 0.6vw, 0.55rem);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .map-frame {
+      width: 100%;
+      height: 220px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .map-frame iframe { width: 100%; height: 100%; border: none; }
+
+    .form-field { margin-bottom: 12px; }
+    .form-field label {
+      display: block;
+      font-size: clamp(0.55rem, 0.7vw, 0.65rem);
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+    .form-field input, .form-field select {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 2px solid #e8ecf0;
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      font-family: 'DM Sans', sans-serif;
+      transition: 0.3s;
+      background: white;
+      color: var(--text);
+    }
+    .form-field input:focus, .form-field select:focus { border-color: var(--primary); outline: none; }
+
+    .price-summary {
+      background: linear-gradient(135deg, #f0f8f4, #e8f5ee);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+      color: var(--text2);
+    }
+    .price-total {
+      font-size: clamp(1rem, 1.3vw, 1.2rem);
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      justify-content: space-between;
+      padding-top: 8px;
+      border-top: 2px solid rgba(26,107,74,0.2);
+    }
+    .btn-confirm {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: clamp(0.8rem, 1vw, 0.95rem);
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.3s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,107,74,0.3); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .guest-form-block {
+      background: #f8f9fb;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--primary);
+    }
+    .guest-form-block h5 {
+      font-size: clamp(0.7rem, 0.8vw, 0.75rem);
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--primary);
+    }
+
+    /* MY BOOKINGS */
+    #myBookingsPage { padding: 70px 5% 50px; }
+    .booking-card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      transition: 0.3s;
+    }
+    .booking-card:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
+    .booking-card-img {
+      width: 100px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+    .booking-info { flex: 1; min-width: 160px; }
+    .booking-info h3 {
+      font-size: clamp(0.9rem, 1.1vw, 1rem);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .booking-ref {
+      font-size: clamp(0.6rem, 0.7vw, 0.7rem);
+      color: var(--text2);
+      margin-bottom: 4px;
+    }
+    .booking-dates {
+      font-size: clamp(0.6rem, 0.7vw, 0.7rem);
+      color: var(--text2);
+      margin-bottom: 3px;
+    }
+    .booking-dates i { color: var(--primary); margin-right: 4px; }
+    .booking-status {
+      display: inline-block;
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-size: clamp(0.55rem, 0.6vw, 0.6rem);
+      font-weight: 700;
+    }
+    .status-confirmed { background: #d4edda; color: #155724; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .booking-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .btn-cancel-booking {
+      padding: 6px 16px;
+      background: transparent;
+      border: 2px solid #e74c3c;
+      color: #e74c3c;
+      border-radius: 10px;
+      font-size: clamp(0.6rem, 0.7vw, 0.7rem);
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-cancel-booking:hover { background: #e74c3c; color: white; }
+    .no-bookings {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .no-bookings i { font-size: 48px; color: #ddd; margin-bottom: 16px; }
+    .no-bookings h3 {
+      font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+      color: var(--text2);
+      margin-bottom: 8px;
+    }
+
+    /* CONFIRM MODAL */
+    .confirm-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-modal-overlay.active { display: flex; }
+    .confirm-modal {
+      background: white;
+      border-radius: 24px;
+      padding: 32px 24px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      animation: popIn 0.3s ease;
+    }
+    @keyframes popIn { from{transform:scale(0.8);opacity:0} to{transform:scale(1);opacity:1} }
+    .confirm-modal .success-icon {
+      width: 70px;
+      height: 70px;
+      background: #d4edda;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 32px;
+      color: #155724;
+    }
+    .confirm-modal h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.3rem, 2vw, 1.6rem);
+      margin-bottom: 8px;
+    }
+    .confirm-modal p {
+      color: var(--text2);
+      line-height: 1.6;
+      font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+    }
+    .confirm-modal .ref-code {
+      font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+      font-weight: 800;
+      color: var(--primary);
+      margin: 12px 0;
+      letter-spacing: 2px;
+    }
+    .confirm-modal-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .btn-view-booking {
+      padding: 10px 22px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-close-modal {
+      padding: 10px 22px;
+      background: #f0f4f8;
+      color: var(--text);
+      border: none;
+      border-radius: 12px;
+      font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 8000;
+      background: var(--dark);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+      font-weight: 600;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: 0.4s;
+      max-width: 280px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--primary); }
+    .toast.error { background: #c0392b; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .booking-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      nav ul { display: none; }
+      .hamburger { display: flex; }
+      .planner-grid { grid-template-columns: 1fr 1fr; }
+      .b-gallery { grid-template-columns: repeat(3, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .dest-grid { grid-template-columns: 1fr; }
+      .pkg-grid { grid-template-columns: 1fr; }
+      .b-main-img { height: 180px; }
+    }
+    @media (max-width: 480px) {
+      header { padding: 10px 4%; }
+      .user-chip span { display: none; }
+      .btn-logout span { display: none; }
+      .btn-logout { padding: 6px 12px; }
+      .home-hero { min-height: 200px; }
+      .step-card { padding: 14px; }
+      .planner-grid { grid-template-columns: 1fr; }
+      .booking-card { flex-direction: column; align-items: flex-start; }
+      .booking-card-img { width: 100%; height: 120px; }
+      .confirm-modal { padding: 24px 16px; }
+      .b-gallery img { height: 50px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+  <div class="loader-spinner"></div>
+  <div class="loader-text">Curating Your Experience</div>
+  <div class="loader-sub">Loading destinations, packages &amp; transport...</div>
+  <div class="loader-images">
+    <img class="loader-img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200" alt="">
+    <img class="loader-img" src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=200" alt="">
+    <img class="loader-img" src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=200" alt="">
+    <img class="loader-img" src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=200" alt="">
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo" onclick="showPage('home')">TRAVE<span>LER</span></div>
+  <nav>
+    <ul>
+      <li><a id="nav-home" onclick="showPage('home')" class="active">Plan Trip</a></li>
+      <li><a id="nav-packages" onclick="showPage('packages')">Packages</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#support">Support</a></li>
+      <li><a id="nav-bookings" onclick="showPage('myBookings')">My Bookings</a></li>
+    </ul>
+  </nav>
+  <div class="header-right">
+    <div class="user-chip" id="userChip">
+      <img id="userAvatarImg" src="" alt="User">
+      <span id="userChipName">User</span>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></button>
+  </div>
+  <div class="hamburger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></div>
+</header>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="showPage('home'); toggleMobileMenu()">Plan Trip</a>
+  <a onclick="showPage('packages'); toggleMobileMenu()">Packages</a>
+  <a onclick="showPage('myBookings'); toggleMobileMenu()">My Bookings</a>
+  <a href="index.html#support">Contact Support</a>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="homePage">
+  <div class="home-hero">
+    <h1>Welcome Back, <span id="heroUserName">Traveler</span></h1>
+    <p>Plan your perfect journey with curated destinations, luxury transport &amp; cultural festivals.</p>
+  </div>
+  <div class="planner-wrap">
+    <div class="step-card">
+      <div class="step-header"><div class="step-num">1</div><h2>Plan Your Destination Adventure</h2></div>
+      <div class="planner-grid">
+        <div class="input-group"><label><i class="fas fa-calendar-alt"></i> Start</label><input type="date" id="planStart"></div>
+        <div class="input-group"><label><i class="fas fa-calendar-check"></i> End</label><input type="date" id="planEnd"></div>
+        <div class="input-group"><label><i class="fas fa-globe"></i> Country</label>
+          <select id="countrySelect" onchange="filterDestinationsByCountry()">
+            <option value="">All Countries</option>
+            <option value="Sri Lanka">Sri Lanka 🇱🇰</option>
+            <option value="France">France 🇫🇷</option>
+            <option value="Maldives">Maldives 🇲🇻</option>
+          </select>
+        </div>
+        <div class="input-group"><label><i class="fas fa-map-marker-alt"></i> City</label>
+          <select id="citySelect"><option value="">All Cities</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-header"><div class="step-num">2</div><h2>✨ Select a Destination</h2></div>
+      <div class="dest-grid" id="destinationsGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PACKAGES PAGE -->
+<div class="page" id="packagesPage">
+  <div class="pkg-section">
+    <div class="section-header">
+      <h2>Exclusive Travel Packages</h2>
+      <p>Pre-designed luxury escapes with flexible booking dates and exclusive discounts.</p>
+    </div>
+    <div class="search-filter-row">
+      <div class="search-box"><i class="fas fa-search"></i><input type="text" id="pkgSearch" placeholder="Search packages..." oninput="filterPackages()"></div>
+    </div>
+    <div class="filter-chips" id="categoryChips">
+      <div class="chip active" data-cat="all" onclick="selectChip(this)">🌟 All</div>
+      <div class="chip" data-cat="Beach Packages" onclick="selectChip(this)">🏖️ Beach</div>
+      <div class="chip" data-cat="Adventure Packages" onclick="selectChip(this)">⛰️ Adventure</div>
+      <div class="chip" data-cat="Honeymoon Packages" onclick="selectChip(this)">❤️ Honeymoon</div>
+      <div class="chip" data-cat="Family Packages" onclick="selectChip(this)">👨‍👩‍👧 Family</div>
+      <div class="chip" data-cat="Luxury Packages" onclick="selectChip(this)">💎 Luxury</div>
+      <div class="chip" data-cat="Budget Packages" onclick="selectChip(this)">💰 Budget</div>
+      <div class="chip" data-cat="Sri Lanka Specific Packages" onclick="selectChip(this)">🇱🇰 Sri Lanka</div>
+      <div class="chip" data-cat="Country Festive Specific Packages" onclick="selectChip(this)">🎉 Festive</div>
+    </div>
+    <div class="pkg-grid" id="packagesGrid"></div>
+  </div>
+</div>
+
+<!-- BOOKING PAGE -->
+<div class="page" id="bookingPage">
+  <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Back</button>
+  <div class="booking-layout">
+    <div class="booking-left">
+      <div class="b-card">
+        <img class="b-main-img" id="bMainImg" src="" alt="">
+        <div class="b-gallery" id="bGallery"></div>
+      </div>
+      <div class="b-card">
+        <div class="b-item-title" id="bTitle"></div>
+        <div class="b-item-desc" id="bDesc"></div>
+        <div class="transport-row">
+          <div class="transport-icon"><i class="fas fa-shuttle-van"></i></div>
+          <div class="transport-text"><strong>Premium Transport</strong><span id="bTransport">Luxury vehicle + chauffeur</span></div>
+        </div>
+        <div class="transport-row" style="background:#e8f5e9;">
+          <div class="transport-icon" style="background:#27ae60;"><i class="fas fa-plane-arrival"></i></div>
+          <div class="transport-text"><strong>✈️ Airport Assist</strong><span id="bAirport">VIP meet &amp; greet, fast-track</span></div>
+        </div>
+        <div class="festival-alert hidden" id="bFestival"></div>
+      </div>
+      <div class="b-card">
+        <h3><i class="fas fa-map-marked-alt"></i> Tour Highlights</h3>
+        <div class="places-list" id="bPlaces"></div>
+      </div>
+      <div class="b-card">
+        <h3><i class="fas fa-map"></i> Route Map</h3>
+        <div class="map-frame"><iframe id="bMapFrame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63371.80385896824!2d79.82131!3d6.9270786!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae253d10f7a7003%3A0x320b2e4d32d3838d!2sColombo!5e0!3m2!1sen!2slk!4v1" allowfullscreen loading="lazy"></iframe></div>
+      </div>
+    </div>
+    <div class="booking-right">
+      <div class="b-card">
+        <div id="bPriceDisplay" style="font-size:clamp(1.3rem, 2vw, 1.6rem); font-weight:800; color:var(--primary); margin-bottom:4px;"></div>
+        <div style="font-size:clamp(0.65rem, 0.8vw, 0.75rem); color:var(--text2); margin-bottom:16px;" id="bPriceNote">per night</div>
+        <div class="form-field"><label>Full Name</label><input type="text" id="fName" placeholder="Your full name"></div>
+        <div class="form-field"><label>Phone</label><input type="tel" id="fPhone" placeholder="+94 77 000 0000"></div>
+        <div class="form-field"><label>Address</label><input type="text" id="fAddress" placeholder="Your address"></div>
+        <div class="form-field"><label>Guests</label><input type="number" id="fGuests" min="1" value="1" onchange="updateGuestForms(); calcTotal()"></div>
+        <div id="guestForms"></div>
+        <div class="grid-2">
+          <div class="form-field"><label>Start</label><input type="date" id="fStartDate" onchange="calcTotal()"></div>
+          <div class="form-field"><label>End</label><input type="date" id="fEndDate" onchange="calcTotal()"></div>
+        </div>
+        <div class="form-field"><label>Payment</label>
+          <select id="fPayment">
+            <option value="card">💳 Credit / Debit</option>
+            <option value="cod">💵 Cash on Arrival</option>
+            <option value="bank">🏦 Bank Transfer</option>
+          </select>
+        </div>
+        <div class="price-summary">
+          <div class="price-row"><span>Base</span><span id="pBase">$0</span></div>
+          <div class="price-row"><span>Guests</span><span id="pGuests">x 1</span></div>
+          <div class="price-row"><span>Nights</span><span id="pNights">0</span></div>
+          <div class="price-total"><span>Total</span><span id="pTotal">$0</span></div>
+        </div>
+        <button class="btn-confirm" onclick="confirmBooking()">✅ Confirm &amp; Book</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MY BOOKINGS -->
+<div class="page" id="myBookingsPage">
+  <div style="padding:70px 5% 50px;">
+    <div class="section-header" style="margin-bottom:24px;">
+      <h2>My Bookings</h2>
+      <p>View and manage all your travel reservations.</p>
+    </div>
+    <div id="bookingsList"></div>
+    <div class="no-bookings hidden" id="noBookings">
+      <i class="fas fa-ticket-alt"></i>
+      <h3>No bookings yet</h3>
+      <p>Start exploring our amazing packages and destinations!</p>
+      <button class="btn-book" style="width:auto; display:inline-block; margin-top:14px; padding:10px 28px;" onclick="showPage('packages')">Explore Packages</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="confirm-modal-overlay" id="confirmModal">
+  <div class="confirm-modal">
+    <div class="success-icon">✅</div>
+    <h2>Booking Confirmed!</h2>
+    <p>Your journey is all set. Here's your reference:</p>
+    <div class="ref-code" id="confirmRef">TRV-XXXXXXXX</div>
+    <p><strong id="confirmDestName"></strong></p>
+    <p id="confirmDates"></p>
+    <p id="confirmGuests"></p>
+    <p style="color:var(--primary); font-weight:700;" id="confirmTotal"></p>
+    <div class="confirm-modal-btns">
+      <button class="btn-view-booking" onclick="viewMyBookings()">View My Bookings</button>
+      <button class="btn-close-modal" onclick="closeConfirmModal()">Continue Exploring</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:8080/api';
+  function getToken() { return localStorage.getItem('traveler_token'); }
+  function getUser() { try { return JSON.parse(localStorage.getItem('traveler_user')); } catch { return null; } }
+
+  const user = getUser();
+  if (!user) { window.location.href = 'index.html'; }
+
+  function logout() {
+    localStorage.removeItem('traveler_token');
+    localStorage.removeItem('traveler_user');
+    window.location.href = 'index.html';
+  }
+
+  function updateUserHeader() {
+    if (user) {
+      document.getElementById('heroUserName').textContent = user.name?.split(' ')[0] || 'Traveler';
+      document.getElementById('userChipName').textContent = user.name?.split(' ')[0] || 'User';
+      document.getElementById('userAvatarImg').src = user.profilePicture ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name||'User')}&background=1a6b4a&color=fff`;
+    }
+  }
+
+  // ─── DATA ──────────────────────────────────────────────────────
+  let destinations = [];
+  let packages = [];
+  let currentItem = null;
+  let prevPage = 'home';
+  let activeCat = 'all';
+
+  const DEST_ENRICHMENT = {
+    "Galle Fort Heritage": { advantages:["Dutch fort","Lighthouse","Boutique cafes"], places:[{name:"Galle Fort",img:"https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=600",desc:"Colonial charm"},{name:"Jungle Beach",img:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600",desc:"Hidden cove"}], transport:"Luxury sedan + local guide", airportFacility:"CMB VIP reception", festival:"Jan: Galle Literary Fest" },
+    "Paris City of Love": { advantages:["Eiffel Tower","Seine cruise","Champagne"], places:[{name:"Eiffel Tower",img:"https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=600",desc:"Iconic tower"},{name:"Louvre",img:"https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=600",desc:"Art museum"}], transport:"Limousine + cruise", airportFacility:"CDG VIP limousine", festival:"Feb: Carnival of Love" },
+    "Bentota Beach Bliss": { advantages:["Pristine beach","River safari","Turtle hatchery"], places:[{name:"Bentota Beach",img:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600",desc:"Golden sands"},{name:"Madu River",img:"https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600",desc:"Mangrove safari"}], transport:"AC sedan + boat taxi", airportFacility:"BIA luxury transfer", festival:"Nov: Bentota Beach Fest" },
+    "Ella Mountain Retreat": { advantages:["Nine Arches","Tea plantations","Hiking"], places:[{name:"Little Adam's Peak",img:"https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=600",desc:"Sunrise trek"},{name:"Ravana Falls",img:"https://images.unsplash.com/photo-1582653291997-079a1b04e6a1?w=600",desc:"Waterfall"}], transport:"Scenic train + luxury van", airportFacility:"Colombo → Ella coach", festival:"Aug: Ella Wellness Summit" }
+  };
+
+  const PKG_ENRICHMENT = {
+    "Sunny Beach Escape": { category:"Beach Packages", advantages:["Private beach","Sunset cruise","Water sports"], places:[{name:"Bentota Beach",img:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600",desc:"Golden sands"}], transport:"AC minivan + boat taxi", airportFacility:"BIA VIP lounge", festival:"July: Kite Surfing Fest" },
+    "Romantic Paris Escape": { category:"Honeymoon Packages", advantages:["Eiffel dinner","Seine cruise","Champagne"], places:[{name:"Eiffel Tower",img:"https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=600",desc:"Iconic"}], transport:"Limousine + cruise", airportFacility:"CDG VIP concierge", festival:"Feb: Carnival of Love" },
+    "Ella Scenic Escape": { category:"Adventure Packages", advantages:["Nine Arches hike","Tea factory","Trekking"], places:[{name:"Nine Arches",img:"https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600",desc:"Viaduct"}], transport:"Scenic train + van", airportFacility:"Colombo → Ella", festival:"Aug: Ella Summit" },
+    "Sigiriya Cultural Tour": { category:"Adventure Packages", advantages:["Lion Rock","Cave paintings","Museum"], places:[{name:"Sigiriya Rock",img:"https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600",desc:"Fortress"}], transport:"4WD + coach", airportFacility:"Cultural Triangle transfer", festival:"Apr: Vesak Illumination" },
+    "Sri Lanka Grand Highlights": { category:"Sri Lanka Specific Packages", advantages:["7 cities","Beach & mountains","Expert guide"], places:[{name:"Colombo",img:"https://images.unsplash.com/photo-1546961342-ea5f62d5a27b?w=600",desc:"Capital"}], transport:"Luxury coach", airportFacility:"VIP meet & greet", festival:"Multiple seasonal" }
+  };
+
+  // ─── PAGE ROUTING ─────────────────────────────────────────────
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    const map = { home:'homePage', packages:'packagesPage', booking:'bookingPage', myBookings:'myBookingsPage' };
+    const navMap = { home:'nav-home', packages:'nav-packages', myBookings:'nav-bookings' };
+    document.getElementById(map[page])?.classList.add('active');
+    if (navMap[page]) document.getElementById(navMap[page])?.classList.add('active');
+    if (page === 'myBookings') loadMyBookings();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goBack() { showPage(prevPage || 'packages'); }
+
+  // ─── DESTINATIONS ─────────────────────────────────────────────
+  const citiesByCountry = { 'Sri Lanka': ['Galle','Ella','Bentota','Kandy','Sigiriya','Colombo'], 'France': ['Paris','Nice','Lyon'], 'Maldives': ['Malé','Ari Atoll'] };
+
+  function filterDestinationsByCountry() {
+    const country = document.getElementById('countrySelect').value;
+    const citySelect = document.getElementById('citySelect');
+    citySelect.innerHTML = '<option value="">All Cities</option>';
+    if (country && citiesByCountry[country]) {
+      citiesByCountry[country].forEach(c => { const o = new Option(c, c); citySelect.add(o); });
+    }
+    renderDestinations();
+  }
+
+  function renderDestinations() {
+    const country = document.getElementById('countrySelect').value;
+    const city = document.getElementById('citySelect').value;
+    const list = destinations.filter(d =>
+      (!country || d.country === country) && (!city || d.city === city)
+    );
+    document.getElementById('destinationsGrid').innerHTML = list.length ? list.map(d => `
+      <div class="dest-card" onclick="openBooking('destination', ${d.id})">
+        <div class="dest-card-img">
+          <img src="${d.img}" alt="${d.name}" loading="lazy">
+          <div class="dest-badge-top">${d.country}</div>
+        </div>
+        <div class="dest-card-body">
+          <h3>${d.name}</h3>
+          <div class="dest-price">$${d.price.toLocaleString()} <small>/ night</small></div>
+          <div class="dest-features">${d.advantages.map(a=>`<span class="feat-tag">${a}</span>`).join('')}</div>
+          <button class="btn-plan" onclick="event.stopPropagation(); openBooking('destination', ${d.id})">Plan with Dates →</button>
+        </div>
+      </div>`).join('') : '<p style="text-align:center;padding:30px;color:var(--text2);grid-column:1/-1;">No destinations found.</p>';
+  }
+
+  // ─── PACKAGES ─────────────────────────────────────────────────
+  function renderPackages(list) {
+    document.getElementById('packagesGrid').innerHTML = list.map(p => `
+      <div class="pkg-card" onclick="openBooking('package', ${p.id})">
+        <div class="pkg-img-wrap">
+          <img src="${p.img}" alt="${p.name}" loading="lazy">
+          <div class="pkg-cat-badge">${p.category.replace(' Packages','')}</div>
+          ${p.discount ? `<div class="pkg-discount-badge">${p.discount}</div>` : ''}
+        </div>
+        <div class="pkg-body">
+          <div class="pkg-title">${p.name}</div>
+          <div class="pkg-price">$${p.price.toLocaleString()} <span>/ package</span></div>
+          <ul class="pkg-list">${p.advantages.map(a=>`<li><i class="fas fa-check-circle"></i>${a}</li>`).join('')}</ul>
+          <button class="btn-book">Book Now →</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function selectChip(el) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    activeCat = el.dataset.cat;
+    filterPackages();
+  }
+
+  function filterPackages() {
+    const q = document.getElementById('pkgSearch').value.toLowerCase();
+    let list = activeCat === 'all' ? [...packages] : packages.filter(p => p.category === activeCat);
+    if (q) list = list.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+    renderPackages(list);
+  }
+
+  // ─── BOOKING ──────────────────────────────────────────────────
+  function openBooking(type, id) {
+    const item = type === 'destination' ? destinations.find(d => d.id === id) : packages.find(p => p.id === id);
+    if (!item) return;
+    currentItem = { ...item, itemType: type };
+    prevPage = type === 'destination' ? 'home' : 'packages';
+
+    const startDate = document.getElementById('planStart')?.value;
+    const endDate = document.getElementById('planEnd')?.value;
+
+    document.getElementById('bMainImg').src = item.img;
+    const galleryImgs = [item.img, ...(item.places?.map(p=>p.img).slice(0,3)||[])];
+    document.getElementById('bGallery').innerHTML = galleryImgs.map((img,i) =>
+      `<img src="${img}" class="${i===0?'active':''}" onclick="setMainImg(this,'${img}')" loading="lazy">`).join('');
+
+    document.getElementById('bTitle').textContent = item.name;
+    document.getElementById('bDesc').textContent = `Included: ${item.advantages.join(', ')}`;
+    document.getElementById('bTransport').textContent = item.transport || 'Luxury vehicle + chauffeur';
+    document.getElementById('bAirport').textContent = item.airportFacility || 'VIP meet & greet, fast-track';
+    document.getElementById('bPriceDisplay').textContent = `$${item.price.toLocaleString()}`;
+    document.getElementById('bPriceNote').textContent = type === 'destination' ? 'per night' : 'per package';
+
+    const festEl = document.getElementById('bFestival');
+    if (item.festival) { festEl.innerHTML = `🎊 <strong>Festival:</strong> ${item.festival}`; festEl.classList.remove('hidden'); }
+    else festEl.classList.add('hidden');
+
+    document.getElementById('bPlaces').innerHTML = (item.places||[]).map(p => `
+      <div class="place-item">
+        <img src="${p.img}" alt="${p.name}" loading="lazy">
+        <div><h4>📍 ${p.name}</h4><p>${p.desc}</p><span class="place-badge"><i class="fas fa-car"></i> Private transfer</span></div>
+      </div>`).join('');
+
+    if (startDate) document.getElementById('fStartDate').value = startDate;
+    if (endDate) document.getElementById('fEndDate').value = endDate;
+    if (user) document.getElementById('fName').value = user.name || '';
+
+    calcTotal();
+    showPage('booking');
+  }
+
+  function setMainImg(el, src) {
+    document.getElementById('bMainImg').src = src;
+    document.querySelectorAll('#bGallery img').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function updateGuestForms() {
+    const n = parseInt(document.getElementById('fGuests').value) || 1;
+    let html = '';
+    for (let i = 1; i <= n; i++) {
+      html += `<div class="guest-form-block"><h5>Guest ${i} Details</h5>
+        <div class="grid-2">
+          <div class="form-field"><label>Name</label><input type="text" placeholder="Name" id="guest_name_${i}"></div>
+          <div class="form-field"><label>ID / Passport</label><input type="text" placeholder="ID" id="guest_id_${i}"></div>
+        </div></div>`;
+    }
+    document.getElementById('guestForms').innerHTML = html;
+  }
+
+  function calcTotal() {
+    if (!currentItem) return;
+    const price = currentItem.price;
+    const guests = parseInt(document.getElementById('fGuests').value) || 1;
+    const start = document.getElementById('fStartDate').value;
+    const end = document.getElementById('fEndDate').value;
+    let nights = 1;
+    if (start && end) {
+      const diff = (new Date(end) - new Date(start)) / 86400000;
+      if (diff > 0) nights = diff;
+    }
+    const total = currentItem.itemType === 'destination' ? price * guests * nights : price * guests;
+    document.getElementById('pBase').textContent = `$${price.toLocaleString()}`;
+    document.getElementById('pGuests').textContent = `x ${guests}`;
+    document.getElementById('pNights').textContent = currentItem.itemType === 'destination' ? `${nights} nights` : 'package';
+    document.getElementById('pTotal').textContent = `$${total.toLocaleString()}`;
+  }
+
+  async function confirmBooking() {
+    const name = document.getElementById('fName').value.trim();
+    const phone = document.getElementById('fPhone').value.trim();
+    const address = document.getElementById('fAddress').value.trim();
+    const start = document.getElementById('fStartDate').value;
+    const end = document.getElementById('fEndDate').value;
+    const guests = parseInt(document.getElementById('fGuests').value) || 1;
+    const payment = document.getElementById('fPayment').value;
+
+    if (!name || !phone || !address || !start || !end) { showToast('Please fill all required fields.', 'error'); return; }
+    if (new Date(end) <= new Date(start)) { showToast('End date must be after start.', 'error'); return; }
+
+    const price = currentItem.price;
+    const nights = currentItem.itemType === 'destination' ? Math.max(1,(new Date(end)-new Date(start))/86400000) : 1;
+    const total = currentItem.itemType === 'destination' ? price * guests * nights : price * guests;
+    const ref = 'TRV-' + Math.random().toString(36).substr(2,8).toUpperCase();
+
+    const guestDetails = [];
+    for (let i = 1; i <= guests; i++) {
+      guestDetails.push({ name: document.getElementById(`guest_name_${i}`)?.value || '', id: document.getElementById(`guest_id_${i}`)?.value || '' });
+    }
+
+    const booking = {
+      id: Date.now(), bookingRef: ref, itemType: currentItem.itemType, itemId: currentItem.id,
+      itemName: currentItem.name, itemImage: currentItem.img, startDate: start, endDate: end,
+      guests, totalPrice: total, fullName: name, phone, address, paymentMethod: payment,
+      status: 'confirmed', guestDetails, createdAt: new Date().toISOString()
+    };
+
+    try {
+      const token = getToken();
+      const res = await fetch(`${API}/bookings`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(booking)
+      });
+      if (res.ok) { const saved = await res.json(); booking.bookingRef = saved.bookingRef || ref; }
+    } catch {}
+
+    const localBookings = JSON.parse(localStorage.getItem('traveler_bookings') || '[]');
+    localBookings.unshift(booking);
+    localStorage.setItem('traveler_bookings', JSON.stringify(localBookings));
+
+    document.getElementById('confirmRef').textContent = booking.bookingRef;
+    document.getElementById('confirmDestName').textContent = booking.itemName;
+    document.getElementById('confirmDates').textContent = `📅 ${start} → ${end}`;
+    document.getElementById('confirmGuests').textContent = `👥 ${guests} Guest${guests>1?'s':''}`;
+    document.getElementById('confirmTotal').textContent = `💰 Total: $${total.toLocaleString()}`;
+    document.getElementById('confirmModal').classList.add('active');
+  }
+
+  function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('active'); }
+  function viewMyBookings() { closeConfirmModal(); showPage('myBookings'); }
+
+  // ─── TOAST ────────────────────────────────────────────────────
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+
+  // ─── LOADERS ──────────────────────────────────────────────────
+  async function loadDestinations() {
+    try {
+      const res = await fetch(`${API}/destinations`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      destinations = data.map(d => ({
+        id: d.id, name: d.name, country: d.country,
+        city: d.town || d.country,
+        price: 289 + (d.id * 30 % 200),
+        img: d.imageUrl || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=700',
+        ...(DEST_ENRICHMENT[d.name] || { advantages:[d.type||'Guided tour'], places:[], transport:'Luxury vehicle', airportFacility:'Airport meet & greet', festival:null })
+      }));
+    } catch { /* fallback empty */ }
+    renderDestinations();
+  }
+
+  async function loadPackages() {
+    try {
+      const res = await fetch(`${API}/packages`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      packages = data.map(p => ({
+        id: p.id, name: p.title, price: p.price,
+        img: p.imageUrl || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=700',
+        discount: p.offer || null,
+        ...(PKG_ENRICHMENT[p.title] || { category:'Featured Packages', advantages:[p.details||'Curated experience'], places:[], transport:'Luxury vehicle', airportFacility:'Airport meet & greet', festival:null })
+      }));
+    } catch { /* fallback */ }
+    renderPackages(packages);
+  }
+
+  // ─── MY BOOKINGS ──────────────────────────────────────────────
+  async function loadMyBookings() {
+    const token = getToken();
+    let apiBookings = [];
+    if (token) {
+      try {
+        const res = await fetch(`${API}/bookings/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          apiBookings = data.map(b => ({
+            id: b.id, bookingRef: b.bookingRef, itemType: b.itemType,
+            itemId: b.itemId, itemName: b.itemName, itemImage: b.itemImage,
+            startDate: b.startDate, endDate: b.endDate, guests: b.guests,
+            totalPrice: b.totalPrice, paymentMethod: b.paymentMethod,
+            status: b.status, createdAt: b.createdAt, calendarEventId: b.calendarEventId
+          }));
+          localStorage.setItem('traveler_bookings', JSON.stringify(apiBookings));
+        }
+      } catch {}
+    }
+    const localBookings = apiBookings.length > 0 ? apiBookings : JSON.parse(localStorage.getItem('traveler_bookings') || '[]');
+
+    if (localBookings.length === 0) {
+      document.getElementById('bookingsList').innerHTML = '';
+      document.getElementById('noBookings').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('noBookings').classList.add('hidden');
+    document.getElementById('bookingsList').innerHTML = localBookings.map(b => `
+      <div class="booking-card" id="bc-${b.id}">
+        <img class="booking-card-img" src="${b.itemImage}" alt="${b.itemName}" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200'">
+        <div class="booking-info">
+          <h3>${b.itemName}</h3>
+          <div class="booking-ref">Ref: <strong>${b.bookingRef}</strong></div>
+          <div class="booking-dates"><i class="fas fa-calendar"></i> ${b.startDate} → ${b.endDate}</div>
+          <div class="booking-dates"><i class="fas fa-users"></i> ${b.guests} Guest${b.guests>1?'s':''}</div>
+          ${b.calendarEventId ? `<div class="booking-dates"><i class="fas fa-calendar-check" style="color:#2ecc71;"></i> Added to Calendar</div>` : ''}
+          <div style="margin-top:6px;"><span class="booking-status status-${b.status}">${b.status.charAt(0).toUpperCase()+b.status.slice(1)}</span></div>
+        </div>
+        <div class="booking-actions">
+          <div style="text-align:right;">
+            <div style="font-size:clamp(1rem,1.2vw,1.1rem); font-weight:800; color:var(--primary);">$${(b.totalPrice||0).toLocaleString()}</div>
+            <div style="font-size:clamp(0.55rem,0.6vw,0.6rem); color:var(--text2);">${new Date(b.createdAt).toLocaleDateString()}</div>
+            ${b.status !== 'cancelled' ? `<button class="btn-cancel-booking" style="margin-top:8px;" onclick="cancelBooking(${b.id})"><i class="fas fa-times"></i> Cancel</button>` : ''}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function cancelBooking(id) {
+    if (!confirm('Cancel this booking?')) return;
+    const token = getToken();
+    if (token) {
+      try { await fetch(`${API}/bookings/${id}/cancel`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); } catch {}
+    }
+    const localBookings = JSON.parse(localStorage.getItem('traveler_bookings') || '[]');
+    const idx = localBookings.findIndex(b => b.id == id);
+    if (idx !== -1) { localBookings[idx].status = 'cancelled'; localStorage.setItem('traveler_bookings', JSON.stringify(localBookings)); }
+    loadMyBookings();
+    showToast('Booking cancelled.', 'success');
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────────
+  window.addEventListener('load', async () => {
+    updateUserHeader();
+    const today = new Date().toISOString().split('T')[0];
+    if (document.getElementById('planStart')) document.getElementById('planStart').min = today;
+    if (document.getElementById('planEnd')) document.getElementById('planEnd').min = today;
+    await Promise.all([loadDestinations(), loadPackages()]);
+    setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 1000);
+  });
+</script>
+</body>
+</html>
